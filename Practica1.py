@@ -7,7 +7,6 @@ img = cv2.imread('imgs/00004.png')
 
 # Convertir la imagen a gris para que el azul se detecte mejor
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
 mser = cv2.MSER_create(1, 1500, 8000)
 
 # Detectar regiones
@@ -17,10 +16,12 @@ mser = cv2.MSER_create(1, 1500, 8000)
 subpanels = []
 
 puntuacion = []
+
 # Iterar sobre las regiones detectadas
 for region in regions:
     # Obtener las coordenadas del rectángulo que rodea a la región
     x, y, w, h = cv2.boundingRect(region)
+    
     # Calcular la relación de aspecto del rectángulo
     aspect_ratio = w / h
     x-= 30
@@ -34,6 +35,7 @@ for region in regions:
         # Recortar la ventana detectada y redimensionarla
         window = img[y:y+h, x:x+w]
         window_resized = cv2.resize(window, (200, 200))
+        new_window = window_resized
 
         subpanel_hsv = cv2.cvtColor(window_resized, cv2.COLOR_BGR2HSV)
 
@@ -61,7 +63,4 @@ for region in regions:
 for i in range (len(subpanels)):
     if(puntuacion[i] > .3):
         print("puntuacion:", puntuacion[i])
-        plt.imshow(subpanels[i])
-        
-        plt.show()
-        plt.plot()
+        cv2.imshow("pant",subpanels[i])
