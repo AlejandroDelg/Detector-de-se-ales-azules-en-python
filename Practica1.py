@@ -2,8 +2,39 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+import json
+
+# cargar el archivo JSON
+with open('anotaciones/Anotaciones.json', 'r') as f:
+    data = json.load(f)
+
+
+
+imagenes = []
+# Iterar sobre las imágenes
+for imagen_id, imagen_data in data.items():
+    #print(f'Imagen: {imagen_data["filename"]}')
+    image_name = imagen_data["filename"]
+    # Iterar sobre las regiones
+    for region in imagen_data['regions']:
+        if image_name == "00003.png":
+            shape_attributes = region['shape_attributes']
+            x1_img = shape_attributes["x"]
+            y1_img = shape_attributes["y"]
+            height = shape_attributes["height"]
+            width = shape_attributes["width"]
+            x2_img = x1_img + width
+            y2_img = y1_img + height
+            imagenes.append(x1_img)
+            imagenes.append(y1_img)
+            imagenes.append(x2_img)
+            imagenes.append(y2_img)
+
+
+
+
 # Cargar la imagen
-img = cv2.imread('imgs/00004.png')
+img = cv2.imread('imgs/00003.png')
 
 # Convertir la imagen a gris para que el azul se detecte mejor
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -16,6 +47,8 @@ mser = cv2.MSER_create(1, 1500, 8000)
 subpanels = []
 
 puntuacion = []
+
+dim_totales = []
 
 # Iterar sobre las regiones detectadas
 for region in regions:
@@ -34,8 +67,8 @@ for region in regions:
         x, y, w, h = max(x, 0), max(y, 0), min(w, img.shape[1] - x), min(h, img.shape[0] - y)
         # Recortar la ventana detectada y redimensionarla
         window = img[y:y+h, x:x+w]
+        dim_totales.append([x,y, x+w, y+h])
         window_resized = cv2.resize(window, (200, 200))
-        new_window = window_resized
 
         subpanel_hsv = cv2.cvtColor(window_resized, cv2.COLOR_BGR2HSV)
 
@@ -53,14 +86,36 @@ for region in regions:
         correlation = np.sum(mascara_hsv * mascara_ideal)/ np.sum(mascara_ideal)
 
         # Establecer un umbral y añadir el sub-panel a la lista de sub-paneles si la correlación es mayor que el umbral
-        threshold = 0.2
+        threshold = 0.0
         if correlation >= threshold:
             puntuacion.append(correlation)
             subpanels.append(window_resized)
 
+def iou(boxA, boxB):
+    # Obtener coordenadas del rectángulo de intersección
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+
+    # Calcular el área de intersección
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+
+    # Calcular el área de las dos cajas de delimitación
+    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+
+    # Calcular el índice de intersección sobre unión
+    iou = interArea / float(boxAArea + boxBArea - interArea) 
+
+    # Devolver el índice de intersección sobre unión
+    return iou
 
 # Mostrar los sub-paneles detectados
 for i in range (len(subpanels)):
     if(puntuacion[i] > .3):
         print("puntuacion:", puntuacion[i])
-        cv2.imshow("pant",subpanels[i])
+        plt.imshow(subpanels[i])
+        print(iou(imagenes, dim_totales[i]))
+        plt.show()
+        plt.plot()
