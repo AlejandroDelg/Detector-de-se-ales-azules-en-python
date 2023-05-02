@@ -48,12 +48,12 @@ for region in regions:
         mascara_ideal = np.ones((200, 200))
 
         # Correlar M (multiplicar los elementos de la mascara ideal (todo unos) con nuestra mascara azul)
-        correlation = np.sum(mascara_hsv * mascara_ideal)
-        
+        correlation = np.sum(mascara_hsv * mascara_ideal)/ np.sum(mascara_ideal)
+
         # Establecer un umbral y añadir el sub-panel a la lista de sub-paneles si la correlación es mayor que el umbral
-        threshold = 0.6
+        threshold = 0.2
         if correlation >= threshold:
-            puntuacion.append(correlation / np.sum(mascara_ideal))
+            puntuacion.append(correlation)
             subpanels.append(window_resized)
 
 
