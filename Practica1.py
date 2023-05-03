@@ -86,7 +86,7 @@ for region in regions:
         correlation = np.sum(mascara_hsv * mascara_ideal)/ np.sum(mascara_ideal)
 
         # Establecer un umbral y añadir el sub-panel a la lista de sub-paneles si la correlación es mayor que el umbral
-        threshold = 0.0
+        threshold = 0.6
         if correlation >= threshold:
             puntuacion.append(correlation)
             subpanels.append(window_resized)
@@ -116,6 +116,8 @@ for i in range (len(subpanels)):
     if(puntuacion[i] > .3):
         print("puntuacion:", puntuacion[i])
         plt.imshow(subpanels[i])
+        print("resultado IoU: " + iou(imagenes, dim_totales[i]))
         print(iou(imagenes, dim_totales[i]))
-        plt.show()
-        plt.plot()
+        cv2.rectangle(img,(dim_totales[0] - 10, dim_totales[1]- 10),(dim_totales[2] +10, dim_totales[3] +10), (0,255,0), 2)
+
+cv2.imshow("img", img)
