@@ -67,7 +67,6 @@ for region in regions:
         x, y, w, h = max(x, 0), max(y, 0), min(w, img.shape[1] - x), min(h, img.shape[0] - y)
         # Recortar la ventana detectada y redimensionarla
         window = img[y:y+h, x:x+w]
-        dim_totales.append([x,y, x+w, y+h])
         window_resized = cv2.resize(window, (200, 200))
 
         subpanel_hsv = cv2.cvtColor(window_resized, cv2.COLOR_BGR2HSV)
@@ -88,6 +87,7 @@ for region in regions:
         # Establecer un umbral y añadir el sub-panel a la lista de sub-paneles si la correlación es mayor que el umbral
         threshold = 0.6
         if correlation >= threshold:
+            dim_totales.append([x,y, x+w, y+h])
             puntuacion.append(correlation)
             subpanels.append(window_resized)
 
